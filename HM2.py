@@ -71,8 +71,10 @@ class System:
         print(f"Found {len(available_drivers)} available driver(s).")
         
         # Iterate through Available drivers
+        order = 0;
         for i in range(len(available_drivers)):
-            print(f"Driver Details:\nName: {available_drivers[i].name}\nLocation: {available_drivers[i].location}")
+            order+=1
+            print(f"Driver Details:\nDriverNumber: {order}\nName: {available_drivers[i].name}\nLocation: {available_drivers[i].location}")
             print("----------------")
         return available_drivers
             
@@ -84,13 +86,13 @@ class System:
             if not drivers:
                 print("No Available drivers...")
                 return None
-            selected_driver = int(input("enter the driver you prefer: "))
+            selected_driver = int(input("enter the driver number you prefer: "))
             selected_driver=drivers[selected_driver]
             
             print(f"Driver Details:\nName: {selected_driver.name}\nLocation: {selected_driver.location}")
 
             # Ask driver for acceptance
-            accept = input("Does the driver accept the ride? (yes/no): ").lower()
+            accept = input(f"Trip deatials:\n  pickup: {pickup}\n  destination: {destination}\nDoes the driver accept the ride? (yes/no): ").lower()
             if accept == "yes":
                 selected_driver.accept_request()
                 new_ride = Ride(student, selected_driver, pickup, destination)

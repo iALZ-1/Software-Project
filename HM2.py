@@ -4,16 +4,11 @@ class User:  #General class
         self.name = name
         self.email = email
 
-
-
-
 class Student(User):  #inherits from user
     def __init__(self, name, email, student_id, college):
         super().__init__(name, email)
         self.student_id = student_id
         self.college = college
-
-
 
 class Driver(User): #inherits from user
     def __init__(self, name, email, driver_id, location):
@@ -25,7 +20,6 @@ class Driver(User): #inherits from user
     def accept_request(self):
         print(f"Driver {self.name} accepted the request.")
         
-
     def reject_request(self):
         print(f"Driver {self.name} rejected the request.")
         self.availability = False
@@ -33,8 +27,6 @@ class Driver(User): #inherits from user
 
 # Ride Class
 class Ride:
-  
-
     def __init__(self, student, driver, pickup, destination):
      
         self.student = student
@@ -44,12 +36,11 @@ class Ride:
         self.status = "Pending"
 
     def start_trip(self):
-        self.status = "Ongoing"
         print("Ride  has started.")
 
     def complete_trip(self):
-        self.status = "Completed"
-        print("Ride  has been completed.")
+        print("Ride has been completed.")
+        exit()
 
 
 # System Class
@@ -86,23 +77,38 @@ class System:
             if not drivers:
                 print("No Available drivers...")
                 return None
-            selected_driver = int(input("enter the driver number you prefer: "))
-            selected_driver=drivers[selected_driver]
+            
+            # Add try-except block around driver selection
+            try:
+                selected_driver = int(input("enter the driver number you prefer: "))
+                if selected_driver < 1 or selected_driver > len(drivers):
+                    print(f"Please enter a number between 1 and {len(drivers)}")
+                    continue
+                selected_driver = drivers[selected_driver - 1]
+            except ValueError:
+                print("Please enter a valid number")
+                continue
             
             print(f"Driver Details:\nName: {selected_driver.name}\nLocation: {selected_driver.location}")
 
             # Ask driver for acceptance
-            accept = input(f"Trip deatials:\n  pickup: {pickup}\n  destination: {destination}\nDoes the driver accept the ride? (yes/no): ").lower()
-            if accept == "yes":
-                selected_driver.accept_request()
-                new_ride = Ride(student, selected_driver, pickup, destination)
-                self.rides.append(new_ride)
-                print(f"Ride booked successfully with driver {selected_driver.name}.")
-                new_ride.start_trip()
-                return new_ride
-            else:
-                selected_driver.reject_request()
-                print("Searching for another driver...")
+            try:
+                accept = input(f"Trip deatials:\n  pickup: {pickup}\n  destination: {destination}\nDoes the driver accept the ride? (yes/no): ").lower().strip()
+                if accept in ['yes', 'y', 'Yes', 'YES', 'Y']:
+                    selected_driver.accept_request()
+                    new_ride = Ride(student, selected_driver, pickup, destination)
+                    self.rides.append(new_ride)
+                    print(f"Ride booked successfully with driver {selected_driver.name}.")
+                    new_ride.start_trip()
+                    return new_ride
+                elif accept in ['no', 'n', 'No', 'NO', 'N']:
+                    selected_driver.reject_request()
+                    print("Searching for another driver...")
+                    continue
+                else:
+                    raise ValueError("Please enter either 'yes' or 'no'")
+            except ValueError as e:
+                print(f"Invalid input: {e}")
                 continue
 
 
@@ -118,18 +124,66 @@ bookRide.register_driver(driver1)
 bookRide.register_driver(driver2)
 bookRide.register_driver(driver3)
 
+# Add this new function:
+def get_student_details():
+    student_name = None
+    student_email = None
+    student_id = None
+    college = None
+    
+    while True:
+        try:
+            if student_name is None:
+                student_name = input("Enter student name: ")
+                if not student_name.isalpha():
+                    raise ValueError("Name should only contain letters")
+                print("Debug: Name validated successfully")
+            
+            if student_email is None:
+                student_email = input("Enter student email: ")
+                if '@' not in student_email or '.' not in student_email:
+                    raise ValueError("Invalid email format")
+                print("Debug: Email validated successfully")
+            
+            if student_id is None:
+                student_id = input("Enter student ID: ")
+                if not student_id.isdigit():
+                    raise ValueError("Student ID should only contain numbers")
+                print("Debug: ID validated successfully")
+            
+            if college is None:
+                college = input("Enter college name: ")
+                if not all(c.isalpha() or c.isspace() for c in college):
+                    raise ValueError("College name should only contain letters and spaces")
+                print("Debug: College validated successfully")
+            
+            return student_name, student_email, student_id, college
+            
+        except ValueError as e:
+            print(f"Invalid input: {e}")
+            print(f"Debug: Error occurred with message: {str(e)}")
+            # Reset only the current invalid input
+            if "Name" in str(e):
+                student_name = None
+            elif "email" in str(e):
+                student_email = None
+            elif "ID" in str(e):
+                student_id = None
+            elif "College" in str(e):
+                college = None
 
-student_name = input("Enter student name: ")
-student_email = input("Enter student email: ")
-student_id = input("Enter student ID: ")
-college = input("Enter college name: ")
+# Replace the student creation line with:
+student_name, student_email, student_id, college = get_student_details()
 student = Student(name=student_name, email=student_email, student_id=student_id, college=college)
 
-pickup = input("Enter pickup location: ")
-destination = input("Enter destination: ")
+pickup = input("Enter pickup location: ")#strings
+destination = input("Enter destination: ")#strings
 
 # Book a ride
 ride = bookRide.book_ride(student, pickup, destination)
 
 # Complete the ride if booked
-ride.complete_trip()
+if ride:
+    ride.complete_trip()
+else:
+    print("Ride booking failed. Please try again later.")

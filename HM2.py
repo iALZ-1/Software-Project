@@ -39,6 +39,8 @@ class Ride:
         print("Ride  has started.")
 
     def complete_trip(self):
+        for i in range(10):
+            print("-")
         print("Ride has been completed.")
         exit()
 
@@ -141,7 +143,8 @@ def get_student_details():
             
             if student_email is None:
                 student_email = input("Enter student email: ")
-                if '@' not in student_email or '.' not in student_email:
+                # Check if email contains more than just dots and @ symbols
+                if '@' not in student_email or '.' not in student_email or student_email.strip('@.') == '':
                     raise ValueError("Invalid email format")
                 print("Debug: Email validated successfully")
             
